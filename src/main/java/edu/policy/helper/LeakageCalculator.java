@@ -9,7 +9,7 @@ import edu.policy.model.data.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.*;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -51,7 +51,19 @@ public class LeakageCalculator {
 
         // create a new state of the target cell
         State stateOfTargetCell = new State(targetCell.getCellType(), targetCell);
-
+        Dictionary<Double,List<CueSet>> bins = new Hashtable<>();
+        List<Double> check = new ArrayList<>();
+        if (targetCell.getCellType().toString().equals("INTEGER")||targetCell.getCellType().toString().equals("RATE")){
+            Double min = targetCell.getMinDomain();
+            Double rn = targetCell.getAttrDomSize()/50.0;
+            check.add(min);
+            for (int j = 0; j < 49; j++){
+                check.add(check.get(check.size()-1)+rn);
+            }
+            for (Double c: check){
+                bins.put(c,new ArrayList<>());
+            }
+        }
         for (CueSet cueSet: cueSets) {
             State tempState = new State(targetCell.getCellType(), targetCell);
 
@@ -119,7 +131,7 @@ public class LeakageCalculator {
                                 stateOfTargetCell.setFullLeakage(TRUE);
                                 tempState.setNoLeakage(FALSE);
                                 tempState.setFullLeakage(TRUE);
-
+                                binEdit(bins,targetCell.getCellType().toString(),check,0,doubleCellValue,cueSet);
                                 break;
 
                             case GTE:
@@ -131,6 +143,19 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                for (Double c: check){
+                                    if (doubleCellValue < c){
+                                        List<CueSet> val = bins.get(c);
+                                        val.add(cueSet);
+                                        bins.put(c,val);
+                                    }
+                                    else{
+                                        List<CueSet> val = bins.get(check.get(check.size()-1));
+                                        val.add(cueSet);
+                                        bins.put(check.get(check.size()-1),val);
+                                    }
+                                }
+                                binEdit(bins,targetCell.getCellType().toString(),check,0,doubleCellValue,cueSet);
                                 break;
 
                             case LTE:
@@ -142,6 +167,19 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                for (Double c: check){
+                                    if (doubleCellValue < c){
+                                        List<CueSet> val = bins.get(c);
+                                        val.add(cueSet);
+                                        bins.put(c,val);
+                                    }
+                                    else{
+                                        List<CueSet> val = bins.get(check.get(check.size()-1));
+                                        val.add(cueSet);
+                                        bins.put(check.get(check.size()-1),val);
+                                    }
+                                }
+                                binEdit(bins,targetCell.getCellType().toString(),check,0,doubleCellValue,cueSet);
                                 break;
 
                             case IN:
@@ -162,7 +200,7 @@ public class LeakageCalculator {
                                 stateOfTargetCell.setFullLeakage(TRUE);
                                 tempState.setNoLeakage(FALSE);
                                 tempState.setFullLeakage(TRUE);
-
+                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
                             case GTE:
                             case GT:
@@ -173,6 +211,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
 
                             case LTE:
@@ -184,6 +223,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
 
                             case IN:
@@ -339,6 +379,44 @@ public class LeakageCalculator {
             throw new java.lang.Error("LeakageCalculator (computeLeakageToParent): Unsupported attribute type.");
 
     }
-
-
+    private static double getBin(List<Double> check,double value){
+        for (Double c: check){
+            if (value <= c) return c;
+            else if (c == check.get(check.size()-1)) return c;
+        }
+        return -1.0;
+    }
+    private static void binEdit(Dictionary<Double, List<CueSet>> bins, String type, List<Double> check, int intCellValue, double doubleCellValue, CueSet cueSet){
+        if (type.equals("INTEGER")){
+            double key = getBin(check,(double) intCellValue);
+            List<CueSet> val = bins.get(key);
+            val.add(cueSet);
+            bins.put(key,val);
+        }
+        else if (type.equals("RATE")){
+            double key = getBin(check,doubleCellValue);
+            List<CueSet> val = bins.get(key);
+            val.add(cueSet);
+            bins.put(key,val);
+        }
+    }
+    private static void setLeak(Dictionary<Double, List<CueSet>> bins, String type, List<Double> check, int intCellValue, double doubleCellValue, CueSet cueSet){
+        if (type.equals("INTEGER")){
+            double key = getBin(check,(double) intCellValue);
+            List<CueSet> val = bins.get(key);
+            for (CueSet item: val){
+                if (item.equals(cueSet)){
+                    System.out.println("yawha?");
+                }
+            }
+            val.add(cueSet);
+            bins.put(key,val);
+        }
+        else if (type.equals("RATE")){
+            double key = getBin(check,doubleCellValue);
+            List<CueSet> val = bins.get(key);
+            val.add(cueSet);
+            bins.put(key,val);
+        }
+    }
 }

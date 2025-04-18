@@ -227,9 +227,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                     logger.info(String.format("%d cuesets being detected.", onDetect.size() + pbdOnDetect.size()));
                 }
             }
-
         }
-
         return trueHide;
 
     }
