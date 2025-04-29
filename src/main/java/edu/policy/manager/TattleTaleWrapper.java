@@ -13,7 +13,6 @@ public class TattleTaleWrapper {
     Session session;
 
     GreedyAlgorithm algo;
-
     Set<Cell> hideCellsWrapper = new HashSet<>();
     private static String checkerBear;
     private static String checkerBooBoo;

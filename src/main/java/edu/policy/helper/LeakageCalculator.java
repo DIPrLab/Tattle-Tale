@@ -143,6 +143,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                /*
                                 for (Double c: check){
                                     if (doubleCellValue < c){
                                         List<CueSet> val = bins.get(c);
@@ -156,6 +157,8 @@ public class LeakageCalculator {
                                     }
                                 }
                                 binEdit(bins,targetCell.getCellType().toString(),check,0,doubleCellValue,cueSet);
+
+                                 */
                                 break;
 
                             case LTE:
@@ -167,6 +170,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
+                                /*
                                 for (Double c: check){
                                     if (doubleCellValue < c){
                                         List<CueSet> val = bins.get(c);
@@ -180,6 +184,7 @@ public class LeakageCalculator {
                                     }
                                 }
                                 binEdit(bins,targetCell.getCellType().toString(),check,0,doubleCellValue,cueSet);
+                                */
                                 break;
 
                             case IN:
@@ -200,7 +205,7 @@ public class LeakageCalculator {
                                 stateOfTargetCell.setFullLeakage(TRUE);
                                 tempState.setNoLeakage(FALSE);
                                 tempState.setFullLeakage(TRUE);
-                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
+                                //binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
                             case GTE:
                             case GT:
@@ -211,7 +216,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
-                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
+                                //binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
 
                             case LTE:
@@ -223,7 +228,7 @@ public class LeakageCalculator {
 
                                 stateOfTargetCell.setNoLeakage(FALSE);
                                 tempState.setNoLeakage(FALSE);
-                                binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
+                                //binEdit(bins,targetCell.getCellType().toString(),check,intCellValue,0.0,cueSet);
                                 break;
 
                             case IN:

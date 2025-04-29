@@ -10,6 +10,8 @@ import edu.policy.model.data.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
     public GreedyKSecrecy(Session session) {
         super(session);
     }
-
+    Hashtable<String,Integer> attributes = new Hashtable<>();
     public List<Cell> greedyHolisticKDen () {
 
         logger.info("Start executing the greedy k-deniability algorithm.");
@@ -61,7 +63,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
      * @return truehide list of hidden cells
      */
     public List<Cell> greedyKDenBreadthFirst(List<Cell> senCells) {
-
+        attributeLB();
         int level = 1;
         List<Cell> trueHide = new ArrayList<>(senCells); // true hide list of all time
         List<Cell> trackTrueHide = new ArrayList<>(); // true hide for each level
@@ -235,6 +237,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
     private List<CueSet> KPrune(Cell senCell, List<CueSet> cueSetsOfSenCell) {
 
         LeakageCalculator.joint_state(senCell, cueSetsOfSenCell, session);
+        kCalculator(senCell,cueSetsOfSenCell.size());
 
         if (isDeniable(senCell, k_percentage))
             return null;
@@ -398,6 +401,49 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
 
     }
 
+    private void kCalculator(Cell cell, int size){
+        if (size == 0){
+            return;
+        }
+        int lim = attributes.get(cell.getAttributeName());
+        if (size == lim){
+            k_percentage = (float) lim/lim;
+        }
+        else {
+            k_percentage = (float) (Math.max(size,lim-size)+1)/lim;
+        }
+    }
+    private Boolean attributeConf(){
+        List<String> attrNames = session.getSchema();
+        if (attrNames.size()!=attributes.size()){
+            List<String> missingAtt = new ArrayList<>();
+            for (String a:attrNames){
+                if(!attributes.containsKey(a)){
+                    missingAtt.add(a);
+                }
+            }
+            for (String ma: missingAtt){
+                try{
+                    PreparedStatement query = session.getUser().queryExecution(String.format("select count(%s) from %s",ma,session.getRelationName()));
+                    ResultSet test = query.executeQuery();
+                    while (test.next()){
+                        int val = test.getInt(1);
+                        attributes.put(ma,val);
+                    }
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+        else return true;
+    }
+    private void attributeLB(){
+        while (!attributeConf()){
+            attributeConf();
+        }
+    }
     public int getTotalCuesetSize() {
         return totalCuesetSize;
     }
