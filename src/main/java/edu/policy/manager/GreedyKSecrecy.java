@@ -170,7 +170,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                 }
 
             }
-
+            List<Cell> foundCells = new ArrayList<>(senCells);
             if (level == 1) {
                 List<CueSet> bestCueSets = new ArrayList<>();
                 for (Cell cell: trueHide) {
@@ -184,7 +184,21 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                 trackTrueHide.addAll(intersection(toHide, flattenBestCueSets));
                 trueHide.addAll(trackTrueHide);
             }
-
+            else {
+                cuesets.removeIf(cueSet -> hasIntersection(cueSet.getCells(),hideCells));
+                List<Cell> iterlist = new ArrayList<>(hideCells);
+                iterlist.removeAll(foundCells);
+                List<CueSet> bestCueSets = new ArrayList<>();
+                for (Cell iter: iterlist){
+                    List<CueSet> cueSetsToPrune = cuesets.stream().filter(cueSet -> cueSet.getSenCell().equals(iter)).collect(Collectors.toList());
+                    List<CueSet> prunedCueSets = KPrune(iter, cueSetsToPrune);
+                    if (prunedCueSets != null) bestCueSets.addAll(prunedCueSets);
+                }
+                foundCells.addAll(hideCells);
+                List<Cell> flattenBestCueSets = bestCueSets.stream().flatMap(cueSet -> cueSet.getCells().stream()).collect(Collectors.toList());
+                trackTrueHide.addAll(intersection(toHide, flattenBestCueSets));
+                trueHide.addAll(trackTrueHide);
+            }
 
 
 
@@ -235,7 +249,6 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
     }
 
     private List<CueSet> KPrune(Cell senCell, List<CueSet> cueSetsOfSenCell) {
-
         LeakageCalculator.joint_state(senCell, cueSetsOfSenCell, session);
         kCalculator(senCell,cueSetsOfSenCell.size());
 
@@ -247,7 +260,7 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                                                             .collect(Collectors.toList());
 
         cueSetsOfSenCell.removeAll(bestCueSets);
-
+        if (cueSetsOfSenCell.isEmpty()) return bestCueSets;
         if (senCell.getCellType().equals(AttributeType.INTEGER) || senCell.getCellType().equals(AttributeType.DOUBLE)) {
             // Optimization for continuous domain attributes:
             // sort the cueset list in **descending order** w.r.t the leakage to the parent
@@ -403,14 +416,18 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
 
     private void kCalculator(Cell cell, int size){
         if (size == 0){
+            session.updatePercentages(cell,(float)-1.0);
             return;
         }
         int lim = attributes.get(cell.getAttributeName());
         if (size == lim){
-            k_percentage = (float) lim/lim;
+            k_percentage = (float) 1.0;
+            session.updatePercentages(cell,k_percentage);
         }
         else {
-            k_percentage = (float) (Math.max(size,lim-size)+1)/lim;
+            float num = Math.max(size,lim-size);
+            k_percentage = (float) Math.min(1.0,num/lim);
+            session.updatePercentages(cell,k_percentage);
         }
     }
     private Boolean attributeConf(){

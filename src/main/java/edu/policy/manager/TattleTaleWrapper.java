@@ -35,7 +35,7 @@ public class TattleTaleWrapper {
 
         hideCellsWrapper = session.getHideCells();
     }
-    private static void testIssuesKDen(GreedyAlgorithm testAlgo,Set<Cell> testCells, String check1, String check2, long time, List<Cell> senCell){
+    private static void testIssuesKDen(GreedyAlgorithm testAlgo,Set<Cell> testCells, String check1, String check2, long time, List<Cell> senCell, Hashtable<Cell,Float> percents){
         switch (testAlgo.usingAlgorithm){
             case "Perfect Deniability":
                 try{
@@ -160,6 +160,13 @@ public class TattleTaleWrapper {
                             writer.write(it.next().toString());
                             writer.write(System.lineSeparator());
                         }
+                        Iterator it2 = percents.entrySet().iterator();
+                        writer.write("k-values for cells:");
+                        writer.write(System.lineSeparator());
+                        while (it2.hasNext()){
+                            writer.write(it2.next().toString());
+                            writer.write(System.lineSeparator());
+                        }
                         writer.close();
                     }
                     else{
@@ -200,6 +207,13 @@ public class TattleTaleWrapper {
                         Iterator it = testCells.iterator();
                         while(it.hasNext()){
                             writer.write(it.next().toString());
+                            writer.write(System.lineSeparator());
+                        }
+                        Iterator it2 = percents.entrySet().iterator();
+                        writer.write("k-values for cells:");
+                        writer.write(System.lineSeparator());
+                        while (it2.hasNext()){
+                            writer.write(it2.next().toString());
                             writer.write(System.lineSeparator());
                         }
                         writer.close();
@@ -300,7 +314,7 @@ public class TattleTaleWrapper {
             hold = System.currentTimeMillis();
             hideCells.addAll(((GreedyPerfectSecrecy) algo).greedyHolisticPerfectDen());
             after = System.currentTimeMillis() - hold;
-            testIssuesKDen(algo,hideCells,checkerBear,checkerBooBoo,pre+after,senCell);
+            testIssuesKDen(algo,hideCells,checkerBear,checkerBooBoo,pre+after,senCell,curSession.getPercentages());
             whoChecksOnCheckerBear(algo,checkerBear,checkerBooBoo,hideCells,senCell);
         }
         else if (curSession.getAlgo().equals("k-den")) {
@@ -320,7 +334,7 @@ public class TattleTaleWrapper {
             hold = System.currentTimeMillis();
             hideCells.addAll(((GreedyKSecrecy) algo).greedyHolisticKDen());
             after = System.currentTimeMillis() - hold;
-            testIssuesKDen(algo,hideCells,checkerBear,checkerBooBoo,pre+after,senCell);
+            testIssuesKDen(algo,hideCells,checkerBear,checkerBooBoo,pre+after,senCell,curSession.getPercentages());
             whoChecksOnCheckerBear(algo,checkerBear,checkerBooBoo,hideCells,senCell);
         }
         else if (curSession.getAlgo().equals("full-modified")) {
