@@ -75,7 +75,6 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
 
         List<DataDependency> schemaDependencies = session.getDcs();
         List<Provenance> schemaPBDs = session.getPbds();
-
         // Cueset detection
         List<CueSet> onDetect = cueDetector.detect(schemaDependencies, senCells);
         Set<CueSet> pbdOnDetect = new HashSet<>();
@@ -96,8 +95,6 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
             cueSetsFanOut.add(totalCuesetSize);
             logger.info(String.format("%d cuesets being detected.", onDetect.size() + pbdOnDetect.size()));
         }
-
-
         // main while loop
         while (!cuesets.isEmpty()) {
 
@@ -187,6 +184,9 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
             else {
                 cuesets.removeIf(cueSet -> hasIntersection(cueSet.getCells(),hideCells));
                 List<Cell> iterlist = new ArrayList<>(hideCells);
+                HashSet clearIL = new HashSet<>(iterlist);
+                iterlist.clear();
+                iterlist.addAll(clearIL);
                 iterlist.removeAll(foundCells);
                 List<CueSet> bestCueSets = new ArrayList<>();
                 for (Cell iter: iterlist){
@@ -195,6 +195,9 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                     if (prunedCueSets != null) bestCueSets.addAll(prunedCueSets);
                 }
                 foundCells.addAll(hideCells);
+                HashSet clearFound = new HashSet<>(foundCells);
+                foundCells.clear();
+                foundCells.addAll(clearFound);
                 List<Cell> flattenBestCueSets = bestCueSets.stream().flatMap(cueSet -> cueSet.getCells().stream()).collect(Collectors.toList());
                 trackTrueHide.addAll(intersection(toHide, flattenBestCueSets));
                 trueHide.addAll(trackTrueHide);
@@ -244,10 +247,14 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
                 }
             }
         }
+
         return trueHide;
 
     }
-
+    private void copyCuesets(HashMap<Cell,List<CueSet>> dict,List<CueSet> cuesets, Cell cell){
+        List<CueSet> cpy = new ArrayList<>(cuesets);
+        dict.put(cell,cpy);
+    }
     private List<CueSet> KPrune(Cell senCell, List<CueSet> cueSetsOfSenCell) {
         LeakageCalculator.joint_state(senCell, cueSetsOfSenCell, session);
         kCalculator(senCell,cueSetsOfSenCell.size());
