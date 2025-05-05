@@ -423,18 +423,18 @@ public class GreedyKSecrecy extends GreedyAlgorithm {
 
     private void kCalculator(Cell cell, int size){
         if (size == 0){
-            session.updatePercentages(cell,(float)-1.0);
+            //session.updatePercentages(cell,(float)-1.0);
             return;
         }
         int lim = attributes.get(cell.getAttributeName());
         if (size == lim){
             k_percentage = (float) 1.0;
-            session.updatePercentages(cell,k_percentage);
+            //session.updatePercentages(cell,k_percentage);
         }
         else {
             float num = Math.max(size,lim-size);
             k_percentage = (float) Math.min(1.0,num/lim);
-            session.updatePercentages(cell,k_percentage);
+            //session.updatePercentages(cell,k_percentage);
         }
     }
     private Boolean attributeConf(){

@@ -43,7 +43,7 @@ public class Session {
     List<Provenance> pbds = new ArrayList<>();
 
     Set<Cell> hideCells = new HashSet<>();
-    Hashtable<Cell, Float> percentage = new Hashtable<>();
+    //Hashtable<Cell, Float> percentage = new Hashtable<>();
     public Session(int expID, User user, String databaseName, String relationName, int tuple_start, int tuple_end,
                    MetaData metaData, int limit, boolean isAscend, String algo, float k_value, String DCDir,
                    List<Cell> policies, long seed, Boolean randomCuesetChoosing, Boolean randomHiddenCellChoosing,
@@ -253,12 +253,15 @@ public class Session {
         this.expSetting.setPolicies(policies);
     }
 
-    public void updatePercentages(Cell cell, float k){
+    /*public void updatePercentages(Cell cell, float k){
         percentage.put(cell,k);
     }
+    */
+    /*
     public Hashtable<Cell,Float> getPercentages(){
         return percentage;
     }
+    */
     @Override
     public String toString() {
         return "Session{" +
